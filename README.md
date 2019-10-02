@@ -6,5 +6,6 @@ First priority: charge only during solar energy production
 Second priority: charge immediately to ensure car is full
 
 Future:
+- web based graphical user interface
 - grid load dependency (charge when grid is under light load)
 - new modules for measurement
