@@ -1,0 +1,18 @@
+{
+    "measurement":{
+        "station":"ABC",
+        "type":"Swissmeteo",
+        "minSunshineDuration":"9"
+    },
+    "wallbox":{
+        "IP":"http://192.168.178.xx",
+        "type":"goEcharger"
+    },
+    "timing":{
+        "deadlineHours":"3",
+        "waitAfterFinished":"3600",
+        "waitWithSunSeconds":"600",
+        "waitWithoutSunSeconds":"120"
+    }
+
+}
