@@ -28,33 +28,31 @@ class goEcharger:
             payload = {'payload': 'alw=1'}
         elif allow == False:
             payload = {'payload': 'alw=0'}
-        resp = requests.get(self.baseURL +'/mqtt', params=payload)
-        if resp.status_code != 200:
-            raise resp.ApiError('GET /status/ {}'.format(resp.status_code))
-        else:
-            self.allowsCharging = allow
-
+        try:
+            requests.get(self.baseURL +'/mqtt', params=payload)
+        except requests.exceptions.RequestException:  # This is the correct syntax
+            raise IOError
+        self.allowsCharging = allow
 
     def setMaxPower(self, maxPower):
         payload = {'payload': 'amp=' + str(maxPower)}
-        resp = requests.get(self.baseURL +'/mqtt', params=payload)
-        if resp.status_code != 200:
-            raise resp.ApiError('GET /status/ {}'.format(resp.status_code))
-        else:
-            self.maxPower = maxPower
+        try:
+            requests.get(self.baseURL +'/mqtt', params=payload)
+        except requests.exceptions.RequestException:  # This is the correct syntax
+            raise IOError
+        self.maxPower = maxPower
 
     def readStatus(self):
         #Connect to wallbox and read some stuff
-        resp = requests.get(self.baseURL + '/status')
-        if resp.status_code != 200:
-            # This means something went wrong.
-            raise resp.ApiError('GET /status/ {}'.format(resp.status_code))
-        else:
-            self.maxPower = resp.json()["amp"]
-            self.allowsCharging = resp.json()["alw"]
-            self.kWh = int(resp.json()["dws"])
-            self.error = int(resp.json()["err"])
-            self.state = int(resp.json()["car"])
+        try:
+            resp = requests.get(self.baseURL + '/status')
+        except requests.exceptions.RequestException:  # This is the correct syntax
+            raise IOError
+        self.maxPower = resp.json()["amp"]
+        self.allowsCharging = resp.json()["alw"]
+        self.kWh = int(resp.json()["dws"])
+        self.error = int(resp.json()["err"])
+        self.state = int(resp.json()["car"])
 
 
 # Wallbox goEchargerSimulation
@@ -78,4 +76,4 @@ class goEchargerSimulation:
         self.maxPower = maxPower
 
     def readStatus(self):
-            self.kWh = self.kWh + 0.5
+        self.kWh = self.kWh + 0.5
