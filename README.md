@@ -9,3 +9,8 @@ Future:
 - web based graphical user interface
 - grid load dependency (charge when grid is under light load)
 - new modules for measurement
+
+Modules
+ChargePlan.py: Main statemachine
+Measurement.py: Classes for measuring the solar energy
+Wallbox.py: Classes for connecting to wallboxes
