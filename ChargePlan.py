@@ -35,7 +35,6 @@ def main():
     #load configuration from JSON file
     with open('config.json') as configFile:
         config = json.load(configFile)
-        print(config["measurement"]["station"])
 
     #Initialize Wallbox
     charger = Wallbox.goEcharger(config["wallbox"]["IP"])
@@ -48,19 +47,24 @@ def main():
 
     printToLogfile("Main initialized")
 
+    # main state machine
     while True:
-        # main state machine
         printToLogfile("State: " + str(state) )
 
         if state == ChargePlanState.STATE_INIT :
-            charger.allowCharging(False)
-            #Deadline is the latest possible charging start time
-            dateObjectNow = datetime.datetime.now()
-            dateObjectGoal = dateObjectNow + datetime.timedelta(days=1) # to be definid in GUI...
-            dateObjectDeadline = dateObjectGoal - datetime.timedelta(hours=int(config["timing"]["deadlineHours"]))
-            printToLogfile("Deadline: " + str(dateObjectDeadline))
-
-            new_state = ChargePlanState.STATE_WAITING
+            try:
+                charger.allowCharging(False)
+                #Deadline is the latest possible charging start time
+                dateObjectNow = datetime.datetime.now()
+                dateObjectGoal = dateObjectNow + datetime.timedelta(hours=24) # to be defined in GUI...
+                dateObjectDeadline = dateObjectGoal - datetime.timedelta(hours=int(config["timing"]["deadlineHours"]))
+                printToLogfile("Deadline: " + str(dateObjectDeadline))
+                new_state = ChargePlanState.STATE_WAITING
+            except IOError:
+                # probably connection error to wallbox, try again
+                printToLogfile("Wallbox IOError")
+                time.sleep(int(config["timing"]["waitAfterError"]))
+                new_state = ChargePlanState.STATE_INIT
 
         elif state == ChargePlanState.STATE_WAITING :
             #Two reasons for starting charge: enough solar power or deadline reached
@@ -145,7 +149,6 @@ def main():
             time.sleep(int(config["timing"]["waitAfterFinished"]))
 
         state = new_state
-
 
 
 

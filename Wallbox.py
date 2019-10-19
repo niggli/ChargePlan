@@ -30,7 +30,7 @@ class goEcharger:
             payload = {'payload': 'alw=0'}
         try:
             requests.get(self.baseURL +'/mqtt', params=payload)
-        except requests.exceptions.RequestException:  # This is the correct syntax
+        except requests.exceptions.RequestException:
             raise IOError
         self.allowsCharging = allow
 
@@ -38,7 +38,7 @@ class goEcharger:
         payload = {'payload': 'amp=' + str(maxPower)}
         try:
             requests.get(self.baseURL +'/mqtt', params=payload)
-        except requests.exceptions.RequestException:  # This is the correct syntax
+        except requests.exceptions.RequestException:
             raise IOError
         self.maxPower = maxPower
 
@@ -46,7 +46,7 @@ class goEcharger:
         #Connect to wallbox and read some stuff
         try:
             resp = requests.get(self.baseURL + '/status')
-        except requests.exceptions.RequestException:  # This is the correct syntax
+        except requests.exceptions.RequestException: 
             raise IOError
         self.maxPower = resp.json()["amp"]
         self.allowsCharging = resp.json()["alw"]

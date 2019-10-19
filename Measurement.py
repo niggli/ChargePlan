@@ -17,13 +17,12 @@ class Swissmeteo:
         # For offline testing:
         # with open('ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json', 'r') as f:
         #    datastore = json.load(f)
-
-        resp = requests.get('https://data.geo.admin.ch/ch.meteoschweiz.messwerte-sonnenscheindauer-10min/ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json')
-        if resp.status_code != 200:
-            # This means something went wrong.
-            raise resp.ApiError('GET /status/ {}'.format(resp.status_code))
-        else:
-            datastore = resp.json()
+        try:
+            resp = requests.get('https://data.geo.admin.ch/ch.meteoschweiz.messwerte-sonnenscheindauer-10min/ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json')
+        except requests.exceptions.RequestException:
+            return 0
+        
+        datastore = resp.json()
 
         for station in datastore['features']:
                 if station['id'] == self.stationID :
