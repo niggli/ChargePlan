@@ -9,7 +9,7 @@ Future:
 - new modules for measurement
 
 Modules
-..*ChargePlanWebApp.py: Flask based multithreading web application
-..*ChargePlan.py: Main businesslogic statemachine
-..*Measurement.py: Classes for measuring the solar energy
-..*Wallbox.py: Classes for connecting to wallboxes
+- ChargePlanWebApp.py: Flask based multithreading web application
+- ChargePlan.py: Main businesslogic statemachine
+- Measurement.py: Classes for measuring the solar energy
+- Wallbox.py: Classes for connecting to wallboxes
