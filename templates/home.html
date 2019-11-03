@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ChargePlan</title>
+  </head>
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+    
+    <h1> Zustand </h1>
+    {% if state %}
+    <p>Status: {{ state }}</h1>
+    {% else %}
+    <p> ERROR </h1>
+    {% endif %}
+    {% if power %}
+    <p>Ladeleistung: {{ power }}</h1>
+    {% endif %}
+    {% if deadline %}
+    <p>Deadline: {{ deadline }}</h1>
+    {% else %}
+    <p> ERROR </h1>
+    {% endif %}    
+    {% endblock %}
+  </body>
+</html>
