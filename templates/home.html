@@ -15,7 +15,14 @@
     <p> ERROR </h1>
     {% endif %}
     {% if power %}
-    <p>Ladeleistung: {{ power }}</h1>
+    <p>Aktuelle Ladeleistung: {{ power }} kW</h1>
+    {% else %}
+    <p> Aktuelle Ladeleistung: 0.0 kW </h1>
+    {% endif %}
+    {% if energy %}
+    <p>Geladene Energie dieses Ladevorgangs: {{ energy }} kWh</h1>
+    {% else %}
+    <p> Geladene Energie dieses Ladevorgangs: 0.0 kWh </h1>
     {% endif %}
     {% if deadline %}
     <p>Deadline: {{ deadline }}</h1>

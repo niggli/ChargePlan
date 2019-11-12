@@ -12,8 +12,8 @@
         "deadlineHours":"3",
         "waitAfterFinished":"3600",
         "waitAfterError":"60",
-        "waitWithSunSeconds":"600",
-        "waitWithoutSunSeconds":"120"
+        "waitWithoutSunSeconds":"120",
+        "waitCharging":"60"
     }
 
 }

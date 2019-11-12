@@ -20,7 +20,9 @@ def home():
     global cp
     GUIstate = GUIstates[int(cp.state)]
     GUIdeadline = cp.deadline.strftime("%d.%m. um %H:%M Uhr")
-    return render_template("home.html", state=GUIstate, power=cp.power, deadline=GUIdeadline)
+    GUIpower = "{:.1f}".format(cp.power)
+    GUIenergy = "{:.1f}".format(cp.energy)
+    return render_template("home.html", state=GUIstate, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy)
     
 @app.route("/settings")
 def settings():

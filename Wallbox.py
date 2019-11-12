@@ -21,7 +21,7 @@ class goEcharger:
         self.currentPower = 0
         self.baseURL = baseURL
         self.state = 0 # 0 = undefined, 1 = wallbox ready no car,  2 = charging, 3 = waiting for car, 4 = Finished
-        self.kWh = 0
+        self.energy = 0
         self.error = 0
 
     def allowCharging(self, allow):
@@ -52,7 +52,7 @@ class goEcharger:
         self.maxPower = resp.json()["amp"]
         self.currentPower = resp.json()["nrg"][11] / 100 # power is returned as 0.01kW
         self.allowsCharging = resp.json()["alw"]
-        self.kWh = int(resp.json()["dws"])
+        self.energy = int(resp.json()["dws"]) / 360000 # Energy is returned as Deka-Watt-Seconds
         self.error = int(resp.json()["err"])
         self.state = int(resp.json()["car"])
 
