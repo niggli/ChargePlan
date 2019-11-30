@@ -24,11 +24,28 @@
     {% else %}
     <p> Geladene Energie dieses Ladevorgangs: 0.0 kWh </h1>
     {% endif %}
+    {% if goal %}
+    <p>Ziel-Zeitpunkt: {{ goal }}</h1>
+    {% else %}
+    <p> Ziel-Zeitpunkt: keiner </h1>
+    {% endif %}
     {% if deadline %}
     <p>Deadline: {{ deadline }}</h1>
     {% else %}
-    <p> ERROR </h1>
-    {% endif %}    
+    <p> Deadline: keine </h1>
+    {% endif %}
+    
+
+    <h1> Steuerung </h1>
+
+    <form method="POST">
+      Ziel-Zeitpunkt verwenden: <input type="checkbox" name="use_goal"><br>
+      Datum: <input type="date" placeholder="DD.MM.YYYY" name="goal_date"><br>
+      Zeit: <input type="time" placeholder="HH:MM" name="goal_time"><br>
+      <input type="submit" value="Senden"><br>
+    </form>
     {% endblock %}
+
+
   </body>
 </html>

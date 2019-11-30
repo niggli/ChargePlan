@@ -7,7 +7,7 @@
 
 import threading
 import ChargePlan
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 GUIstates = ["NULL", "Initialisierung", "Warten", "Laden", "Fertig", "Fehler"]
 
@@ -15,15 +15,28 @@ app = Flask(__name__)
 
 cp = ChargePlan.ChargePlanEngine()
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
     global cp
+    # if form is submitted
+    if request.method == 'POST':
+        if request.form.get('use_goal') == False :
+            cp.setNewGoal(None, None)
+        else :
+            cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
+        
+    #if GET method is called, only show webpage
     GUIstate = GUIstates[int(cp.state)]
-    GUIdeadline = cp.deadline.strftime("%d.%m. um %H:%M Uhr")
+    if cp.getGoal() != None :
+        GUIdeadline = cp.deadline.strftime("%d.%m. um %H:%M Uhr")
+        GUIgoal = cp.getGoal().strftime("%d.%m. um %H:%M Uhr")
+    else:
+        GUIdeadline = None
+        GUIgoal = None
     GUIpower = "{:.1f}".format(cp.power)
     GUIenergy = "{:.1f}".format(cp.energy)
-    return render_template("home.html", state=GUIstate, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy)
-    
+    return render_template("home.html", state=GUIstate, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal)
+
 @app.route("/settings")
 def settings():
     return render_template("settings.html")
