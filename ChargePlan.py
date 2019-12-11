@@ -47,7 +47,7 @@ class ChargePlanEngine:
         except ValueError:
             self._goal = None
             self.deadline = None
-            self.printToLogfile("No Goal.")
+            self.printToLogfile("ValueError, no Goal. dateString: " + dateString + " timeString: " + timeString)
     
     def getGoal(self):
         return self._goal
@@ -95,18 +95,22 @@ class ChargePlanEngine:
                         time.sleep(int(self.config["timing"]["waitCharging"]))
                         new_state = ChargePlanState.STATE_CHARGING
 
-                    elif dateObjectNow > self.deadline:
-                        # Too late, start charging now
-                        self.printToLogfile("Allow charging: too late")
-                        charger.allowCharging(True)
-                        time.sleep(int(self.config["timing"]["waitCharging"]))
-                        new_state = ChargePlanState.STATE_CHARGING
+                    elif self.deadline != None:
+                        if  dateObjectNow > self.deadline:
+                            # Too late, start charging now
+                            self.printToLogfile("Allow charging: too late")
+                            charger.allowCharging(True)
+                            time.sleep(int(self.config["timing"]["waitCharging"]))
+                            new_state = ChargePlanState.STATE_CHARGING
 
-                    else:
-                        # Don't actively stop charging so manual activation doesn't get overridden ???
-                        self.printToLogfile("Don't allow, wait 120s")
-                        time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
-                        new_state = ChargePlanState.STATE_WAITING
+                        else:
+                            self.printToLogfile("Don't allow, wait 120s")
+                            time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                            new_state = ChargePlanState.STATE_WAITING
+                    else :
+                            self.printToLogfile("Don't allow, wait 120s")
+                            time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                            new_state = ChargePlanState.STATE_WAITING
 
                 except IOError:
                     # probably connection error to wallbox, try again
@@ -131,16 +135,26 @@ class ChargePlanEngine:
                             self.printToLogfile("Continue charging: Sunshine >= minSunshineDuration")
                             time.sleep(int(self.config["timing"]["waitCharging"]))
                             new_state = ChargePlanState.STATE_CHARGING
-                        elif dateObjectNow > self.deadline:
-                            self.printToLogfile("Continue charging: too late")
-                            time.sleep(int(self.config["timing"]["waitCharging"]))
-                            new_state = ChargePlanState.STATE_CHARGING
+
+                        elif self.deadline != None:
+                            if dateObjectNow > self.deadline:
+                                self.printToLogfile("Continue charging: too late")
+                                time.sleep(int(self.config["timing"]["waitCharging"]))
+                                new_state = ChargePlanState.STATE_CHARGING
+
+                            else:
+                                #sun gone, stop charging
+                                charger.allowCharging(False)
+                                self.printToLogfile("Stop charging, wait 120s")
+                                time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                                new_state = ChargePlanState.STATE_WAITING
+
                         else:
-                            #sun gone, stop charging
-                            charger.allowCharging(False)
-                            self.printToLogfile("Stop charging, wait 120s")
-                            time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
-                            new_state = ChargePlanState.STATE_WAITING
+                                #sun gone, stop charging
+                                charger.allowCharging(False)
+                                self.printToLogfile("Stop charging, wait 120s")
+                                time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                                new_state = ChargePlanState.STATE_WAITING
 
                 except IOError:
                     # probably connection error to wallbox, try again
@@ -153,11 +167,12 @@ class ChargePlanEngine:
                 try:
                     charger.readStatus()
                     self.printToLogfile("Charger state: " + str(charger.state))
-                    if charger.state == 1 or charger.state == 3 :
+                    if charger.state == 1 :
                         # If state isn't 4 anymore, the car has been disconnected
                         self.printToLogfile("Charging finished, car disconnected")
-                    else:
-                        self.printToLogfile("Charging finished, restart ChargePlan")
+                    elif charger.state == 3  or charger.state == 2 :
+                        self.printToLogfile("Car connected, restart engine")
+                        new_state = ChargePlanState.STATE_WAITING
                     time.sleep(int(self.config["timing"]["waitAfterFinished"]))
                 except IOError:
                     # probably connection error to wallbox, try again
