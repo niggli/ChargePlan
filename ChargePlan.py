@@ -36,18 +36,34 @@ class ChargePlanEngine:
         print(timeString + ": " + logstring)
 
     def setNewGoal(self, dateString, timeString):
-        #try to convert strings to datetime object
-        try :
-            datetimeString = dateString + " " + timeString
-            self._goal = datetime.datetime.strptime(datetimeString, "%d.%m.%Y %H:%M")
-            #Deadline is the latest possible charging start time
-            self.deadline = self._goal - datetime.timedelta(hours=int(self.config["timing"]["deadlineHours"]))
-            self.printToLogfile("Goal: " + str(self._goal))
-            self.printToLogfile("Deadline: " + str(self.deadline))
-        except ValueError:
+        if dateString != None and timeString != None :
+            #try to convert strings to datetime object
+            try :
+                datetimeString = dateString + " " + timeString
+                self._goal = datetime.datetime.strptime(datetimeString, "%d.%m.%Y %H:%M")
+                #Deadline is the latest possible charging start time
+                self.deadline = self._goal - datetime.timedelta(hours=int(self.config["timing"]["deadlineHours"]))
+                self.printToLogfile("Goal: " + str(self._goal))
+                self.printToLogfile("Deadline: " + str(self.deadline))
+            except ValueError:
+                #possibly because of usage of mobile device with date picker, which returns YYYY-MM-DD
+                try :
+                    datetimeString = dateString + " " + timeString
+                    self._goal = datetime.datetime.strptime(datetimeString, "%Y-%m-%d %H:%M")
+                    #Deadline is the latest possible charging start time
+                    self.deadline = self._goal - datetime.timedelta(hours=int(self.config["timing"]["deadlineHours"]))
+                    self.printToLogfile("Goal: " + str(self._goal))
+                    self.printToLogfile("Deadline: " + str(self.deadline))
+                except ValueError:
+                    # Typerror is raised if both arguments are None
+                    self._goal = None
+                    self.deadline = None
+                    self.printToLogfile("ValueError, no Goal. dateString: " + dateString + " timeString: " + timeString)
+        else :
             self._goal = None
             self.deadline = None
-            self.printToLogfile("ValueError, no Goal. dateString: " + dateString + " timeString: " + timeString)
+            self.printToLogfile("No Goal set" )
+
     
     def getGoal(self):
         return self._goal
@@ -172,6 +188,8 @@ class ChargePlanEngine:
                         self.printToLogfile("Charging finished, car disconnected")
                     elif charger.state == 3  or charger.state == 2 :
                         self.printToLogfile("Car connected, restart engine")
+                        self._goal = None
+                        self.deadline = None
                         new_state = ChargePlanState.STATE_WAITING
                     time.sleep(int(self.config["timing"]["waitAfterFinished"]))
                 except IOError:

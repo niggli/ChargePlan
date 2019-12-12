@@ -20,7 +20,7 @@ def home():
     global cp
     # if form is submitted
     if request.method == 'POST':
-        if request.form.get('use_goal') == False :
+        if request.form.get('use_goal') == None :
             cp.setNewGoal(None, None)
         else :
             cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
