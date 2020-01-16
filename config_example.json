@@ -1,19 +1,39 @@
 {
-    "measurement":{
-        "station":"ABC",
-        "type":"Swissmeteo",
-        "minSunshineDuration":"9"
-    },
+    "measurements": [
+        {
+            "type":"Solar-Log",
+            "url":"https://xxx.solarlog-web.ch/emulated_main_13343.html",
+            "username":"test@customer.ch",
+            "password":"12345678",
+            "thresholds": [
+                {"minPowerProductionKW":120, "chargeCurrentAmpere":16},
+                {"minPowerProductionKW":80, "chargeCurrentAmpere":8}
+            ]
+        },
+
+        {
+            "type":"Swissmeteo",
+            "station":"ABC",
+            "thresholds": [
+                {"minSunshineDuration":9, "chargeCurrentAmpere":16},
+                {"minSunshineDuration":7, "chargeCurrentAmpere":8}
+            ]
+        }
+
+    ],
+
     "wallbox":{
         "IP":"http://192.168.178.xx",
-        "type":"goEcharger"
+        "type":"goEcharger",
+        "absolutMaxCurrent":16
     },
+
     "timing":{
-        "deadlineHours":"3",
-        "waitAfterFinished":"3600",
-        "waitAfterError":"60",
-        "waitWithoutSunSeconds":"120",
-        "waitCharging":"60"
+        "deadlineHours":3,
+        "waitAfterFinishedSeconds":300,
+        "waitAfterErrorSeconds":60,
+        "waitWithoutSunSeconds":120,
+        "waitChargingSeconds":60
     }
 
 }

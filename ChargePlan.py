@@ -42,7 +42,7 @@ class ChargePlanEngine:
                 datetimeString = dateString + " " + timeString
                 self._goal = datetime.datetime.strptime(datetimeString, "%d.%m.%Y %H:%M")
                 #Deadline is the latest possible charging start time
-                self.deadline = self._goal - datetime.timedelta(hours=int(self.config["timing"]["deadlineHours"]))
+                self.deadline = self._goal - datetime.timedelta(hours=self.config["timing"]["deadlineHours"])
                 self.printToLogfile("Goal: " + str(self._goal))
                 self.printToLogfile("Deadline: " + str(self.deadline))
             except ValueError:
@@ -51,7 +51,7 @@ class ChargePlanEngine:
                     datetimeString = dateString + " " + timeString
                     self._goal = datetime.datetime.strptime(datetimeString, "%Y-%m-%d %H:%M")
                     #Deadline is the latest possible charging start time
-                    self.deadline = self._goal - datetime.timedelta(hours=int(self.config["timing"]["deadlineHours"]))
+                    self.deadline = self._goal - datetime.timedelta(hours=self.config["timing"]["deadlineHours"])
                     self.printToLogfile("Goal: " + str(self._goal))
                     self.printToLogfile("Deadline: " + str(self.deadline))
                 except ValueError:
@@ -74,11 +74,12 @@ class ChargePlanEngine:
             self.config = json.load(configFile)
 
         #Initialize Wallbox
-        charger = Wallbox.goEcharger(self.config["wallbox"]["IP"])
-        #charger = Wallbox.goEchargerSimulation(self.config["wallbox"]["IP"])
+        charger = Wallbox.goEcharger(self.config["wallbox"]["IP"], self.config["wallbox"]["absolutMaxCurrent"])
+        #charger = Wallbox.goEchargerSimulation(self.config["wallbox"]["IP"], self.config["wallbox"]["absolutMaxCurrent"])
 
         #Initialize Measurement
-        weatherSensor = Measurement.Swissmeteo(self.config["measurement"]["station"])
+        #weatherSensor = Measurement.Swissmeteo(self.config["measurement"]["station"])
+        weatherSensor = Measurement.SolarLog(self.config["measurements"][0]["url"], self.config["measurements"][0]["username"], self.config["measurements"][0]["password"], self.config["measurements"][0]["thresholds"])
 
         self.state = ChargePlanState.STATE_INIT
 
@@ -94,7 +95,7 @@ class ChargePlanEngine:
                 except IOError:
                     # probably connection error to wallbox, try again
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(int(self.config["timing"]["waitAfterError"]))
+                    time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
                     new_state = ChargePlanState.STATE_INIT
 
             elif self.state == ChargePlanState.STATE_WAITING :
@@ -105,10 +106,12 @@ class ChargePlanEngine:
                     self.printToLogfile("Charger state: " + str(charger.state))
                     self.power = charger.currentPower
                     self.energy = charger.energy
-                    if weatherSensor.getSunshineDuration() >= int(self.config["measurement"]["minSunshineDuration"]):
-                        self.printToLogfile("Allow charging: Sunshine >= minSunshineDuration")
+                    maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent()
+                    if maxAllowedCurrent > 0:
+                        self.printToLogfile("Allow charging: getMaxAllowedCurrent: " + str(maxAllowedCurrent))
+                        charger.setMaxCurrent(maxAllowedCurrent)
                         charger.allowCharging(True)
-                        time.sleep(int(self.config["timing"]["waitCharging"]))
+                        time.sleep(self.config["timing"]["waitChargingSeconds"])
                         new_state = ChargePlanState.STATE_CHARGING
 
                     elif self.deadline != None:
@@ -116,22 +119,22 @@ class ChargePlanEngine:
                             # Too late, start charging now
                             self.printToLogfile("Allow charging: too late")
                             charger.allowCharging(True)
-                            time.sleep(int(self.config["timing"]["waitCharging"]))
+                            time.sleep(self.config["timing"]["waitChargingSeconds"])
                             new_state = ChargePlanState.STATE_CHARGING
 
                         else:
                             self.printToLogfile("Don't allow, wait 120s")
-                            time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                            time.sleep(self.config["timing"]["waitWithoutSunSeconds"])
                             new_state = ChargePlanState.STATE_WAITING
                     else :
                             self.printToLogfile("Don't allow, wait 120s")
-                            time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                            time.sleep(self.config["timing"]["waitWithoutSunSeconds"])
                             new_state = ChargePlanState.STATE_WAITING
 
                 except IOError:
                     # probably connection error to wallbox, try again
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(int(self.config["timing"]["waitAfterError"]))
+                    time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
                     new_state = ChargePlanState.STATE_WAITING
 
                 
@@ -147,35 +150,37 @@ class ChargePlanEngine:
 
                     else:
                         dateObjectNow = datetime.datetime.now()
-                        if weatherSensor.getSunshineDuration() >= int(self.config["measurement"]["minSunshineDuration"]):
-                            self.printToLogfile("Continue charging: Sunshine >= minSunshineDuration")
-                            time.sleep(int(self.config["timing"]["waitCharging"]))
+                        maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent()
+                        if maxAllowedCurrent > 0:
+                            self.printToLogfile("Continue charging: getMaxAllowedCurrent: " + str(maxAllowedCurrent))
+                            charger.setMaxCurrent(maxAllowedCurrent)
+                            time.sleep(self.config["timing"]["waitChargingSeconds"])
                             new_state = ChargePlanState.STATE_CHARGING
 
                         elif self.deadline != None:
                             if dateObjectNow > self.deadline:
                                 self.printToLogfile("Continue charging: too late")
-                                time.sleep(int(self.config["timing"]["waitCharging"]))
+                                time.sleep(self.config["timing"]["waitChargingSeconds"])
                                 new_state = ChargePlanState.STATE_CHARGING
 
                             else:
                                 #sun gone, stop charging
                                 charger.allowCharging(False)
                                 self.printToLogfile("Stop charging, wait 120s")
-                                time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                                time.sleep(self.config["timing"]["waitWithoutSunSeconds"])
                                 new_state = ChargePlanState.STATE_WAITING
 
                         else:
                                 #sun gone, stop charging
                                 charger.allowCharging(False)
                                 self.printToLogfile("Stop charging, wait 120s")
-                                time.sleep(int(self.config["timing"]["waitWithoutSunSeconds"]))
+                                time.sleep(self.config["timing"]["waitWithoutSunSeconds"])
                                 new_state = ChargePlanState.STATE_WAITING
 
                 except IOError:
                     # probably connection error to wallbox, try again
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(int(self.config["timing"]["waitAfterError"]))
+                    time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
                     new_state = ChargePlanState.STATE_CHARGING
 
 
@@ -191,20 +196,20 @@ class ChargePlanEngine:
                         self._goal = None
                         self.deadline = None
                         new_state = ChargePlanState.STATE_WAITING
-                    time.sleep(int(self.config["timing"]["waitAfterFinished"]))
+                    time.sleep(self.config["timing"]["waitAfterFinishedSeconds"])
                 except IOError:
                     # probably connection error to wallbox, try again
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(int(self.config["timing"]["waitAfterError"]))
+                    time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
                     new_state = ChargePlanState.STATE_FINISHED
 
             elif self.state == ChargePlanState.STATE_ERROR :
                 self.printToLogfile("Statemachine stuck in STATE_ERROR")
-                time.sleep(int(self.config["timing"]["waitAfterError"]))
+                time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
 
             else:
                 self.printToLogfile("Error: Invalid state")
-                time.sleep(int(self.config["timing"]["waitAfterFinished"]))
+                time.sleep(self.config["timing"]["waitAfterFinishedSeconds"])
 
             self.state = new_state
 
