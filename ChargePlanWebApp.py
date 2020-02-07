@@ -15,17 +15,11 @@ app = Flask(__name__)
 
 cp = ChargePlan.ChargePlanEngine()
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def home():
     global cp
-    # if form is submitted
-    if request.method == 'POST':
-        if request.form.get('use_goal') == None :
-            cp.setNewGoal(None, None)
-        else :
-            cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
-        
-    #if GET method is called, only show webpage
+
+    # load data and show webpage
     GUIstate = GUIstates[int(cp.state)]
     if cp.getGoal() != None :
         GUIdeadline = cp.deadline.strftime("%d.%m. um %H:%M Uhr")
@@ -37,9 +31,19 @@ def home():
     GUIenergy = "{:.1f}".format(cp.energy)
     return render_template("home.html", state=GUIstate, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal)
 
-@app.route("/settings")
+@app.route("/settings",  methods=["GET", "POST"])
 def settings():
-    return render_template("settings.html")
+    global cp
+    # if form is submitted
+    if request.method == 'POST':
+        if request.form.get('use_goal') == None :
+            cp.setNewGoal(None, None)
+            return render_template("settings.html", formPosted=True)
+        else :
+            cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
+            return render_template("settings.html", formPosted=True)
+    else :
+        return render_template("settings.html", formPosted=None)
     
 @app.route("/logfile")
 def logfile():

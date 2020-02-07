@@ -8,9 +8,18 @@
     {% extends "template.html" %}
     {% block content %}
     
-    <h1> Settings </h1>
-    <p> under construction</p>
-   
+    <h1> Steuerung </h1>
+
+    {% if formPosted %}
+    <p>Einstellungen gespeichert. Zurück auf <a href="{{ url_for('home') }}">Home</a></p>
+    {% else %}
+    <form method="POST">
+      Ziel-Zeitpunkt verwenden: <input type="checkbox" name="use_goal"><br>
+      Datum: <input type="date" placeholder="DD.MM.YYYY" name="goal_date"><br>
+      Zeit: <input type="time" placeholder="HH:MM" name="goal_time"><br>
+      <input type="submit" value="Senden"><br>
+    </form>
+    {% endif %}
       
     {% endblock %}
   </body>

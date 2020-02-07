@@ -71,9 +71,10 @@ class goEchargerSimulation:
         self.allowsCharging = False
         self.absolutMaxCurrent = absolutMaxCurrent
         self.maxCurrent = 0
+        self.currentPower = 0
         self.baseURL = baseURL
         self.state = 0 #enum?
-        self.kWh = 0
+        self.energy = 0
         self.error = 0
 
     def allowCharging(self, allow):
@@ -83,4 +84,4 @@ class goEchargerSimulation:
         self.maxCurrent = maxCurrent
 
     def readStatus(self):
-        self.kWh = self.kWh + 0.5
+        self.energy = self.energy + 0.5
