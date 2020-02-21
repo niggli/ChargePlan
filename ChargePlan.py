@@ -144,7 +144,7 @@ class ChargePlanEngine:
                         new_state = ChargePlanState.STATE_WAITING
                     else:
                         if maxAllowedCurrent > 0:
-                            self.printToLogfile("Allow charging: getMaxAllowedCurrent: " + str(maxAllowedCurrent))
+                            self.printToLogfile("Continue charging: getMaxAllowedCurrent: " + str(maxAllowedCurrent) + "power: " + str(self.power))                            
                             charger.setMaxCurrent(maxAllowedCurrent)
                             charger.allowCharging(True)
                             time.sleep(self.config["timing"]["waitChargingSeconds"])
@@ -194,7 +194,7 @@ class ChargePlanEngine:
                         # try all of them but stop as soon as one of them returns a valid value
                         maxAllowedCurrent = None
                         for weatherSensor in weatherSensorList:
-                            if maxAllowedCurrent != None:
+                            if maxAllowedCurrent == None:
                                 try:
                                     maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent()
                                 except IOError:
@@ -209,7 +209,7 @@ class ChargePlanEngine:
                             new_state = ChargePlanState.STATE_WAITING
                         else:
                             if maxAllowedCurrent > 0:
-                                self.printToLogfile("Continue charging: getMaxAllowedCurrent: " + str(maxAllowedCurrent))
+                                self.printToLogfile("Continue charging: getMaxAllowedCurrent: " + str(maxAllowedCurrent) + "power: " + str(self.power))
                                 charger.setMaxCurrent(maxAllowedCurrent)
                                 time.sleep(self.config["timing"]["waitChargingSeconds"])
                                 new_state = ChargePlanState.STATE_CHARGING
