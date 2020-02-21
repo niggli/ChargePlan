@@ -1,7 +1,7 @@
 {
     "measurements": [
         {
-            "type":"Solar-Log",
+            "type":"Solarlog",
             "url":"https://xxx.solarlog-web.ch/emulated_main_13343.html",
             "username":"test@customer.ch",
             "password":"12345678",
