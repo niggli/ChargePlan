@@ -9,9 +9,20 @@
 
 #requests is the defacto standard library for using REST
 import requests
+from enum import IntEnum
+
+# State of wallbox, PWM signalisation according to type2 definition
+class WallboxState(IntEnum):
+        STATE_UNDEFINED = 0
+        STATE_READY_NO_CAR = 1
+        STATE_CHARGING = 2
+        STATE_WAITING_FOR_CAR = 3
+        STATE_FINISHED_CAR_STILL_CONNECTED = 4
 
 
+##################################################################################################
 # Wallbox goEcharger
+##################################################################################################
 class goEcharger:
 
     def __init__(self, baseURL, absolutMaxCurrent):
@@ -21,7 +32,7 @@ class goEcharger:
         self.maxCurrent = 0
         self.currentPower = 0
         self.baseURL = baseURL
-        self.state = 0 # 0 = undefined, 1 = wallbox ready no car,  2 = charging, 3 = waiting for car, 4 = Finished
+        self.state = WallboxState.STATE_UNDEFINED
         self.energy = 0
         self.error = 0
 
@@ -59,11 +70,13 @@ class goEcharger:
         self.allowsCharging = resp.json()["alw"]
         self.energy = int(resp.json()["dws"]) / 360000 # Energy is returned as Deka-Watt-Seconds
         self.error = int(resp.json()["err"])
-        self.state = int(resp.json()["car"])
+        self.state = WallboxState(int(resp.json()["car"]))
 
 
+##################################################################################################
 # Wallbox goEchargerSimulation
 # can be used if testing the software without a real wallbox
+##################################################################################################
 class goEchargerSimulation:
 
     def __init__(self, baseURL, absolutMaxCurrent):
@@ -73,7 +86,7 @@ class goEchargerSimulation:
         self.maxCurrent = 0
         self.currentPower = 0
         self.baseURL = baseURL
-        self.state = 0 #enum?
+        self.state = WallboxState.STATE_CHARGING
         self.energy = 0
         self.error = 0
 
