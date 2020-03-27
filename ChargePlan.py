@@ -243,7 +243,7 @@ class ChargePlanEngine:
                         time.sleep(self.config["timing"]["waitWithoutCarSeconds"])
                     elif charger.state == Wallbox.WallboxState.STATE_WAITING_FOR_CAR  or charger.state == Wallbox.WallboxState.STATE_CHARGING :
                         self.printToLogfile("Car starts charging again, probably pre-Heat")
-                        new_state = ChargePlanState.STATE_CHARGING
+                        new_state = ChargePlanState.STATE_FINISHED
                 except IOError:
                     # probably connection error to wallbox, try again
                     self.printToLogfile("Wallbox IOError")
