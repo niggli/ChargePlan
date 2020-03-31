@@ -9,6 +9,7 @@
 
 #requests is the defacto standard library for using REST
 import requests
+import json
 from enum import IntEnum
 
 # State of wallbox, PWM signalisation according to type2 definition
@@ -63,14 +64,16 @@ class goEcharger:
         #Connect to wallbox and read some stuff
         try:
             resp = requests.get(self.baseURL + '/status')
+            self.maxCurrent = resp.json()["amp"]
+            self.currentPower = resp.json()["nrg"][11] / 100 # power is returned as 0.01kW
+            self.allowsCharging = resp.json()["alw"]
+            self.energy = int(resp.json()["dws"]) / 360000 # Energy is returned as Deka-Watt-Seconds
+            self.error = int(resp.json()["err"])
+            self.state = WallboxState(int(resp.json()["car"]))
         except requests.exceptions.RequestException: 
             raise IOError
-        self.maxCurrent = resp.json()["amp"]
-        self.currentPower = resp.json()["nrg"][11] / 100 # power is returned as 0.01kW
-        self.allowsCharging = resp.json()["alw"]
-        self.energy = int(resp.json()["dws"]) / 360000 # Energy is returned as Deka-Watt-Seconds
-        self.error = int(resp.json()["err"])
-        self.state = WallboxState(int(resp.json()["car"]))
+        except json.decoder.JSONDecodeError:
+            raise IOError
 
 
 ##################################################################################################
