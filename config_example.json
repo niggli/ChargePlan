@@ -30,7 +30,9 @@
 
     "timing":{
         "deadlineHours":3,
+        "connectionMaxRetrys":10,
         "waitAfterFinishedSeconds":300,
+        "waitWithoutCarSeconds":120,
         "waitAfterErrorSeconds":60,
         "waitWithoutSunSeconds":120,
         "waitChargingSeconds":60

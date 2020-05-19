@@ -9,7 +9,8 @@ import threading
 import ChargePlan
 from flask import Flask, render_template, request
 
-GUIstates = ["NULL", "Initialisierung", "Warten", "Laden", "Fertig", "Fehler"]
+# This enum must correlate to the class ChargePlanState
+GUIstates = ["NULL", "Initialisierung", "Kein Auto", "Auto verbunden", "Fertig", "Fehler"]
 
 app = Flask(__name__)
 
@@ -27,9 +28,17 @@ def home():
     else:
         GUIdeadline = None
         GUIgoal = None
+    if cp.state == ChargePlan.ChargePlanState.STATE_CHARGING:
+        if cp.allowCharging == True:
+            GUIallowCharging = "erlaubt"
+        else:
+            GUIallowCharging = "gesperrt"
+    else :
+        GUIallowCharging = None
+
     GUIpower = "{:.1f}".format(cp.power)
     GUIenergy = "{:.1f}".format(cp.energy)
-    return render_template("home.html", state=GUIstate, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal)
+    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal)
 
 @app.route("/settings",  methods=["GET", "POST"])
 def settings():

@@ -134,11 +134,17 @@ class ChargePlanEngine:
                         else : 
                             self.printToLogfile("Car connected but already finished")
                             new_state = ChargePlanState.STATE_FINISHED
+                    IOerror_count = 0
                 except IOError:
                     # probably connection error to wallbox, try again
+                    IOerror_count = IOerror_count + 1
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(self.config["timing"]["waitWithoutCarSeconds"])
-                    new_state = ChargePlanState.STATE_NO_CAR
+                    # if error count is too high, re-init everything
+                    if (IOerror_count > self.config["timing"]["connectionMaxRetrys"]) :
+                        new_state = ChargePlanState.STATE_INIT
+                    else :
+                        time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
+                        new_state = ChargePlanState.STATE_NO_CAR
 
 ##################################################################################################
 # STATE_CHARGING
@@ -218,12 +224,17 @@ class ChargePlanEngine:
                                     self.printToLogfile("No sun, don't charge, wait.")
                                     time.sleep(self.config["timing"]["waitWithoutSunSeconds"])
                                     new_state = ChargePlanState.STATE_CHARGING
-
+                    IOerror_count = 0
                 except IOError:
                     # probably connection error to wallbox, try again
+                    IOerror_count = IOerror_count + 1
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
-                    new_state = ChargePlanState.STATE_CHARGING
+                    # if error count is too high, re-init everything
+                    if (IOerror_count > self.config["timing"]["connectionMaxRetrys"]) :
+                        new_state = ChargePlanState.STATE_INIT
+                    else :
+                        time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
+                        new_state = ChargePlanState.STATE_CHARGING
 
 ##################################################################################################
 # STATE_FINISHED
@@ -244,11 +255,18 @@ class ChargePlanEngine:
                     elif charger.state == Wallbox.WallboxState.STATE_WAITING_FOR_CAR  or charger.state == Wallbox.WallboxState.STATE_CHARGING :
                         self.printToLogfile("Car starts charging again, probably pre-Heat")
                         new_state = ChargePlanState.STATE_FINISHED
+                        time.sleep(self.config["timing"]["waitAfterFinishedSeconds"])
+                    IOerror_count = 0
                 except IOError:
                     # probably connection error to wallbox, try again
+                    IOerror_count = IOerror_count + 1
                     self.printToLogfile("Wallbox IOError")
-                    time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
-                    new_state = ChargePlanState.STATE_FINISHED
+                    # if error count is too high, re-init everything
+                    if (IOerror_count > self.config["timing"]["connectionMaxRetrys"]) :
+                        new_state = ChargePlanState.STATE_INIT
+                    else :
+                        time.sleep(self.config["timing"]["waitAfterErrorSeconds"])
+                        new_state = ChargePlanState.STATE_FINISHED
 
 ##################################################################################################
 # STATE_ERROR
