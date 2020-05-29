@@ -24,7 +24,6 @@ class ChargePlanEngine:
 
     def __init__(self):
         self.state = ChargePlanState.STATE_INIT
-        self.allowCharging = False
         self.power = 0
         self.energy = 0
         self._goal = None
@@ -103,7 +102,6 @@ class ChargePlanEngine:
                         else :
                             self.printToLogfile("Invalid weatherSensor definition")
 
-                    self.allowCharging = False
                     charger.allowCharging(False)
                     new_state = ChargePlanState.STATE_NO_CAR
                 except IOError:
@@ -161,7 +159,7 @@ class ChargePlanEngine:
                         # car disconnected
                         new_state = ChargePlanState.STATE_FINISHED
                     elif charger.state == Wallbox.WallboxState.STATE_FINISHED_CAR_STILL_CONNECTED :
-                        if self.allowCharging == True :
+                        if charger.allowsCharging == True :
                             # Car says it's finished during charging, so battery is full
                             new_state = ChargePlanState.STATE_FINISHED
                         else :
@@ -204,7 +202,6 @@ class ChargePlanEngine:
                             # Decide on charging depending on deadline and measurements
                             if deadlineReached:
                                     # Deadline reached, charge
-                                    self.allowCharging = True
                                     charger.allowCharging(True)
                                     self.printToLogfile("Charge: deadline reached. Power: " + str(self.power))
                                     charger.setMaxCurrent(self.config["wallbox"]["absolutMaxCurrent"])
@@ -212,14 +209,12 @@ class ChargePlanEngine:
                                     new_state = ChargePlanState.STATE_CHARGING
                             else :
                                 if maxAllowedCurrent > 0:
-                                    self.allowCharging = True
                                     charger.allowCharging(True)
                                     charger.setMaxCurrent(maxAllowedCurrent)
                                     self.printToLogfile("Charge: getMaxAllowedCurrent: " + str(maxAllowedCurrent) + " power: " + str(self.power))
                                     time.sleep(self.config["timing"]["waitChargingSeconds"])
                                     new_state = ChargePlanState.STATE_CHARGING
                                 else:
-                                    self.allowCharging = False
                                     charger.allowCharging(False)
                                     self.printToLogfile("No sun, don't charge, wait.")
                                     time.sleep(self.config["timing"]["waitWithoutSunSeconds"])
@@ -242,12 +237,12 @@ class ChargePlanEngine:
             elif self.state == ChargePlanState.STATE_FINISHED :
                 try:
                     charger.readStatus()
+                    charger.setMaxCurrent(self.config["wallbox"]["absolutMaxCurrent"])
                     self.printToLogfile("Charger state: " + str(charger.state))
                     if charger.state == Wallbox.WallboxState.STATE_FINISHED_CAR_STILL_CONNECTED :
                         self.printToLogfile("Charging finished, car still connected")
                         time.sleep(self.config["timing"]["waitAfterFinishedSeconds"])
                     elif charger.state == Wallbox.WallboxState.STATE_READY_NO_CAR :
-                        self.allowCharging = False
                         charger.allowCharging(False)
                         self.printToLogfile("Charging finished, car disconnected")
                         new_state = ChargePlanState.STATE_NO_CAR
