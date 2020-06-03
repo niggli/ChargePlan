@@ -10,7 +10,7 @@
     
     <h1> Zustand </h1>
     {% if state %}
-    <p>Status: {{ state }}</h1>
+    <p>Status: {{ state }} {% if allowCharging %} {{allowCharging}} {% endif %}</h1>
     {% else %}
     <p> ERROR </h1>
     {% endif %}

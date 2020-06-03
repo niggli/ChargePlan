@@ -30,9 +30,9 @@ def home():
         GUIgoal = None
     if cp.state == ChargePlan.ChargePlanState.STATE_CHARGING:
         if cp.allowCharging == True:
-            GUIallowCharging = "erlaubt"
+            GUIallowCharging = ", freigegeben"
         else:
-            GUIallowCharging = "gesperrt"
+            GUIallowCharging = ", gesperrt"
     else :
         GUIallowCharging = None
 
