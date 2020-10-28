@@ -7,6 +7,7 @@
 
 import threading
 import ChargePlan
+import datetime
 from flask import Flask, render_template, request
 
 # This enum must correlate to the class ChargePlanState
@@ -16,9 +17,14 @@ app = Flask(__name__)
 
 cp = ChargePlan.ChargePlanEngine()
 
-@app.route("/")
+@app.route("/",  methods=["GET", "POST"])
 def home():
     global cp
+    # if "Charge now" button is clicked
+    if request.method == 'POST':
+        dateObjectNow = datetime.datetime.now()
+        
+        cp.setNewGoal(dateObjectNow.date().strftime("%d.%m.%Y"), dateObjectNow.time().strftime("%H:%M"))
 
     # load data and show webpage
     GUIstate = GUIstates[int(cp.state)]
@@ -53,10 +59,6 @@ def settings():
             return render_template("settings.html", formPosted=True)
     else :
         return render_template("settings.html", formPosted=None)
-    
-@app.route("/logfile")
-def logfile():
-    return render_template("logfile.html")
 
 class ChargePlanThread(threading.Thread):
     def run(self):
