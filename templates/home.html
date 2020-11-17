@@ -10,34 +10,30 @@
     
     <h1> Zustand </h1>
     {% if state %}
-    <p>Status: {{ state }} {% if allowCharging %} {{allowCharging}} {% endif %}</h1>
+    <p>Status: {{ state }} {% if allowCharging %} {{allowCharging}} {% endif %}</p>
     {% else %}
-    <p> ERROR </h1>
+    <p> ERROR </p>
     {% endif %}
     {% if power %}
-    <p>Aktuelle Ladeleistung: {{ power }} kW</h1>
+    <p>Aktuelle Ladeleistung: {{ power }} kW</p>
     {% else %}
-    <p> Aktuelle Ladeleistung: 0.0 kW </h1>
+    <p> Aktuelle Ladeleistung: 0.0 kW </p>
     {% endif %}
     {% if energy %}
-    <p>Geladene Energie dieses Ladevorgangs: {{ energy }} kWh</h1>
+    <p>Geladene Energie dieses Ladevorgangs: {{ energy }} kWh</p>
     {% else %}
-    <p> Geladene Energie dieses Ladevorgangs: 0.0 kWh </h1>
+    <p> Geladene Energie dieses Ladevorgangs: 0.0 kWh </p>
     {% endif %}
     {% if goal %}
-    <p>Ziel-Zeitpunkt: {{ goal }}</h1>
+    <p>Ziel-Zeitpunkt: {{ goal }}</p>
     {% else %}
-    <p> Ziel-Zeitpunkt: keiner </h1>
+    <p> Ziel-Zeitpunkt: keiner </p>
     {% endif %}
     {% if deadline %}
-    <p>Deadline: {{ deadline }}</h1>
+    <p>Deadline: {{ deadline }}</p>
     {% else %}
-    <p> Deadline: keine </h1>
+    <p> Deadline: keine </p
     {% endif %}
-
-    <form method="POST">
-      <input type="submit" value="Sofort Laden">
-    </form>
     
     {% endblock %}
 

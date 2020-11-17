@@ -13,11 +13,16 @@
     {% if formPosted %}
     <p>Einstellungen gespeichert. Zurück auf <a href="{{ url_for('home') }}">Home</a></p>
     {% else %}
+    <h2>Ziel-Zeitpunkt</h2>
     <form method="POST">
       Ziel-Zeitpunkt verwenden: <input type="checkbox" name="use_goal"><br>
       Datum: <input type="date" placeholder="DD.MM.YYYY" name="goal_date"><br>
       Zeit: <input type="time" placeholder="HH:MM" name="goal_time"><br>
       <input type="submit" value="Senden">
+    </form>
+    <h2>Sofort laden</h2>
+    <form method="POST">
+      <input type="submit" value="Jetzt sofort Laden">
     </form>
     {% endif %}
       
