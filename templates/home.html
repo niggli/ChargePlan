@@ -9,31 +9,57 @@
     {% block content %}
     
     <h1> Zustand </h1>
-    {% if state %}
-    <p>Status: {{ state }} {% if allowCharging %} {{allowCharging}} {% endif %}</p>
-    {% else %}
-    <p> ERROR </p>
-    {% endif %}
-    {% if power %}
-    <p>Aktuelle Ladeleistung: {{ power }} kW</p>
-    {% else %}
-    <p> Aktuelle Ladeleistung: 0.0 kW </p>
-    {% endif %}
-    {% if energy %}
-    <p>Geladene Energie dieses Ladevorgangs: {{ energy }} kWh</p>
-    {% else %}
-    <p> Geladene Energie dieses Ladevorgangs: 0.0 kWh </p>
-    {% endif %}
-    {% if goal %}
-    <p>Ziel-Zeitpunkt: {{ goal }}</p>
-    {% else %}
-    <p> Ziel-Zeitpunkt: keiner </p>
-    {% endif %}
-    {% if deadline %}
-    <p>Deadline: {{ deadline }}</p>
-    {% else %}
-    <p> Deadline: keine </p
-    {% endif %}
+    <table>
+      <tr>
+        <td>Status:</td>
+        {% if state %}
+          <td>{{ state }} {% if allowCharging %} {{allowCharging}} {% endif %}</td>
+        {% else %}
+          <td> ERROR </td>
+        {% endif %}
+      </tr>
+      <tr>
+        <td>Aktuelle Ladeleistung:</td>
+        {% if power %}
+          <td>{{ power }} kW</td>
+        {% else %}
+          <td>0.0 kW </td>
+        {% endif %}
+      </tr>
+      <tr>
+        <td>Geladene Energie dieses Ladevorgangs:</td>
+        {% if energy %}
+          <td>{{ energy }} kWh</td>
+        {% else %}
+          <td>0.0 kWh</td>
+        {% endif %}
+      </tr>
+      <tr>
+        <td>Ziel-Zeitpunkt:</td>
+        {% if goal %}
+          <td>{{ goal }}</td>
+        {% else %}
+          <td>-</td>
+        {% endif %}
+      </tr>
+      <tr>
+        <td>Deadline:</td>
+        {% if deadline %}
+          <td>{{ deadline }}</td>
+        {% else %}
+          <td>-</td>
+        {% endif %}
+      </tr>
+      <tr>
+        <td>Maximale Ladeenergie:</td>
+        {% if limitmaxenergy %}
+          <td>{{ maxenergy }} kWh</td>
+        {% else %}
+          <td>unbegrenzt </td>
+        {% endif %}
+      </tr>
+    </table>
+
     
     {% endblock %}
 

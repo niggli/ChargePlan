@@ -36,6 +36,8 @@ class goEcharger:
         self.state = WallboxState.STATE_UNDEFINED
         self.energy = 0
         self.error = 0
+        self.maxEnergy = 0
+        self.limitToMaxEnergy = False
 
     def allowCharging(self, allow):
         if allow == True:
@@ -60,16 +62,38 @@ class goEcharger:
             raise IOError
         self.maxCurrent = maxCurrent
 
+    def setMaxEnergy(self, limitToMaxEnergy, maxEnergy):
+        if limitToMaxEnergy == True :
+            payload = {'payload': 'dwo=' + '{:d}'.format(int(maxEnergy * 10)) + ',stp=2'} #Energy is configured as 0.1 kWh
+        else :
+            payload = {'payload': 'dwo=0,stp=0'} #Energy is configured as 0.1 kWh
+        #Send the data to the wallbox
+        try:
+            requests.get(self.baseURL +'/mqtt', params=payload)
+        except requests.exceptions.RequestException:
+            raise IOError
+
+        self.limitToMaxEnergy = limitToMaxEnergy
+        self.maxEnergy = maxEnergy
+
     def readStatus(self):
         #Connect to wallbox and read some stuff
         try:
             resp = requests.get(self.baseURL + '/status')
             self.maxCurrent = resp.json()["amp"]
             self.currentPower = resp.json()["nrg"][11] / 100 # power is returned as 0.01kW
-            self.allowsCharging = resp.json()["alw"]
+            if resp.json()["alw"] == 0 :
+                self.allowsCharging = False
+            else :
+                self.allowsCharging = True
             self.energy = int(resp.json()["dws"]) / 360000 # Energy is returned as Deka-Watt-Seconds
             self.error = int(resp.json()["err"])
             self.state = WallboxState(int(resp.json()["car"]))
+            self.maxEnergy = float(resp.json()["dwo"]) / 10 # Energy is returned as 0.1 kWh
+            if resp.json()["stp"] == 0 :
+                self.limitToMaxEnergy = False
+            else :
+                self.limitToMaxEnergy = True
         except requests.exceptions.RequestException: 
             raise IOError
         except json.decoder.JSONDecodeError:
@@ -92,6 +116,8 @@ class goEchargerSimulation:
         self.state = WallboxState.STATE_CHARGING
         self.energy = 0
         self.error = 0
+        self.maxEnergy = 0
+        self.limitToMaxEnergy = False
 
     def allowCharging(self, allow):
         self.allowsCharging = allow

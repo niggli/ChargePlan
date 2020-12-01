@@ -20,12 +20,6 @@ cp = ChargePlan.ChargePlanEngine()
 @app.route("/",  methods=["GET", "POST"])
 def home():
     global cp
-    # if "Charge now" button is clicked
-    if request.method == 'POST':
-        dateObjectNow = datetime.datetime.now()
-        
-        cp.setNewGoal(dateObjectNow.date().strftime("%d.%m.%Y"), dateObjectNow.time().strftime("%H:%M"))
-
     # load data and show webpage
     GUIstate = GUIstates[int(cp.state)]
     if cp.getGoal() != None :
@@ -44,21 +38,40 @@ def home():
 
     GUIpower = "{:.1f}".format(cp.power)
     GUIenergy = "{:.1f}".format(cp.energy)
-    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal)
+    GUIlimitToMaxEnergy = cp.limitToMaxEnergy
+    GUImaxenergy = "{:.1f}".format(cp.maxEnergy)
+    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy)
 
 @app.route("/settings",  methods=["GET", "POST"])
 def settings():
     global cp
-    # if form is submitted
+    # if form is submitted   
     if request.method == 'POST':
-        if request.form.get('use_goal') == None :
-            cp.setNewGoal(None, None)
-            return render_template("settings.html", formPosted=True)
+        # if "Charge now" button is clicked
+        if request.form.get('chargeInstantly') != None :
+            dateObjectNow = datetime.datetime.now()
+            cp.setNewGoal(dateObjectNow.date().strftime("%d.%m.%Y"), dateObjectNow.time().strftime("%H:%M"))
         else :
-            cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
-            return render_template("settings.html", formPosted=True)
-    else :
+            try:
+                limit = float(request.form.get('limit'))
+            except ValueError:
+                limit = 0
+
+            # translate from "on" to "True"
+            if request.form.get('use_limit') == "on" :
+                cp.setMaxEnergy(True, limit)
+            else :
+                cp.setMaxEnergy(False, limit)
+
+            if request.form.get('use_goal') == None :
+                cp.setNewGoal(None, None)
+            else :
+                cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
+            
+        return render_template("settings.html", formPosted=True)
+    else : #Form not posted
         return render_template("settings.html", formPosted=None)
+
 
 class ChargePlanThread(threading.Thread):
     def run(self):

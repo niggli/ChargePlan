@@ -15,14 +15,29 @@
     {% else %}
     <h2>Ziel-Zeitpunkt</h2>
     <form method="POST">
-      Ziel-Zeitpunkt verwenden: <input type="checkbox" name="use_goal"><br>
-      Datum: <input type="date" placeholder="DD.MM.YYYY" name="goal_date"><br>
-      Zeit: <input type="time" placeholder="HH:MM" name="goal_time"><br>
-      <input type="submit" value="Senden">
+      <table>
+        <tr>
+          <td>Ziel-Zeitpunkt verwenden: </td><td><input type="checkbox" name="use_goal"></td>
+        </tr>
+        <tr>
+          <td>Datum: </td><td><input type="date" placeholder="DD.MM.YYYY" name="goal_date"></td>
+        </tr>
+        <tr>
+          <td>Zeit: </td><td><input type="time" placeholder="HH:MM" name="goal_time"></td>
+        </tr>
+        <tr>
+          <td>Ladung automatisch beenden: </td><td><input type="checkbox" name="use_limit"></td>
+        </tr>
+        <tr>
+          <td>Beenden nach (kWh): </td><td><input type="float" name="limit"></td>
+        </tr>
+
+      </table>
+      <input type="submit" name="settings" value="Senden">
     </form>
     <h2>Sofort laden</h2>
     <form method="POST">
-      <input type="submit" value="Jetzt sofort Laden">
+      <input type="submit" name="chargeInstantly" value="Jetzt sofort Laden">
     </form>
     {% endif %}
       

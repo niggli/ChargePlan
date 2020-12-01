@@ -30,6 +30,9 @@ class ChargePlanEngine:
         self.deadline = None
         self.config = None
         self.allowCharging = False # internal state, not the same as the Wallbox state which can change through the Wallbox itself
+        self.maxEnergy = 0
+        self.limitToMaxEnergy = False
+
         self.printToLogfile("Main initialized")
 
     def printToLogfile(self, logstring):
@@ -64,8 +67,18 @@ class ChargePlanEngine:
         else :
             self._goal = None
             self.deadline = None
-            self.printToLogfile("No Goal set" )
+            self.printToLogfile("No Goal set")
 
+    def setMaxEnergy(self, limitToMaxEnergy, maxEnergy):
+        #Only store data, don't send to wallbox directly
+        if limitToMaxEnergy == True :
+            self.limitToMaxEnergy = True
+            self.maxEnergy = maxEnergy
+            self.printToLogfile("Energy limit set: " + str(maxEnergy) + " kWh")
+        else :
+            self.limitToMaxEnergy = False
+            self.maxEnergy = 0
+            self.printToLogfile("No energy limit set" )
     
     def getGoal(self):
         return self._goal
@@ -208,6 +221,7 @@ class ChargePlanEngine:
                                     self.allowCharging = True # internal state
                                     self.printToLogfile("Charge: deadline reached. Power: " + str(self.power))
                                     charger.setMaxCurrent(self.config["wallbox"]["absolutMaxCurrent"])
+                                    charger.setMaxEnergy(self.limitToMaxEnergy, self.maxEnergy)
                                     time.sleep(self.config["timing"]["waitChargingSeconds"])
                                     new_state = ChargePlanState.STATE_CHARGING
                             else :
@@ -215,6 +229,7 @@ class ChargePlanEngine:
                                     charger.allowCharging(True)
                                     self.allowCharging = True # internal state
                                     charger.setMaxCurrent(maxAllowedCurrent)
+                                    charger.setMaxEnergy(self.limitToMaxEnergy, self.maxEnergy)
                                     self.printToLogfile("Charge: getMaxAllowedCurrent: " + str(maxAllowedCurrent) + " power: " + str(self.power))
                                     time.sleep(self.config["timing"]["waitChargingSeconds"])
                                     new_state = ChargePlanState.STATE_CHARGING
