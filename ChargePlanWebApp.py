@@ -49,6 +49,7 @@ def settings():
     if request.method == 'POST':
         # if "Charge now" button is clicked
         if request.form.get('chargeInstantly') != None :
+            cp.setMaxEnergy(False, 0)
             dateObjectNow = datetime.datetime.now()
             cp.setNewGoal(dateObjectNow.date().strftime("%d.%m.%Y"), dateObjectNow.time().strftime("%H:%M"))
         else :
