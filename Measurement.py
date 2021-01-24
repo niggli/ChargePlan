@@ -25,7 +25,7 @@ class Swissmeteo:
 
     def getMaxAllowedCurrent(self):
         try:
-            resp = requests.get('https://data.geo.admin.ch/ch.meteoschweiz.messwerte-sonnenscheindauer-10min/ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json')
+            resp = requests.get('https://data.geo.admin.ch/ch.meteoschweiz.messwerte-sonnenscheindauer-10min/ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json', timeout=5)
 
             datastore = resp.json()
 
@@ -44,7 +44,7 @@ class Swissmeteo:
             # If no threshold is reached, return 0
             return 0
 
-        except requests.exceptions.RequestException:
+        except (requests.exceptions.RequestException, requests.exceptions.Timeout):
             raise IOError
 
 
@@ -68,10 +68,10 @@ class SolarLog:
         try:
             with requests.Session() as s:
                 payload = {"username": self.username, "password": self.password, "submit": "Login", "action": "login"}
-                s.post(self.url, data=payload)
+                s.post(self.url, data=payload, timeout=5)
 
                 # An authorised request.
-                website = s.get(self.url)
+                website = s.get(self.url, timeout=5)
                 powerPatternList = re.findall(r"P<sub>AC</sub>: [0-9]{1,6} W", website.text)
                 if len(powerPatternList) > 0 :
                     powerStringList = re.findall(r"[0-9]{1,6}", powerPatternList[0])
@@ -93,8 +93,42 @@ class SolarLog:
             # If no threshold is reached, return 0
             return 0
 
-        except requests.exceptions.RequestException:
+        except (requests.exceptions.RequestException, requests.exceptions.Timeout):
             raise IOError
 
 
+######################################################################################
+# Class Fronius
+#
+# Interface to a Fronius PV inverter which follows the "Fronius Solar API V1". Targets
+# and is tested with a Fronius Symo 3.7-3 S
+######################################################################################
+class Fronius:
 
+    def __init__(self, baseURL, deviceID, thresholds):
+        self.baseURL = baseURL
+        self.deviceID = deviceID
+        self.thresholds = thresholds
+
+    def getMaxAllowedCurrent(self):
+        try:
+            payload = {"Scope": "Device", "DeviceID" : str(self.deviceID), "DataCollection" : "CommonInverterData"}
+            resp = requests.get(self.baseURL + "/solar_api/v1/GetInverterRealtimeData.cgi", data=payload, timeout=5)
+
+            datastore = resp.json()
+
+            currentPowerkW = datastore['Body']['Data']['PAC']['Value'] / 1000
+            print('currentPowerkW:' + str(currentPowerkW))
+
+            # The maximum allowed charging power is dependant on the current solar power.
+
+            # Sort list so the maximum power is first
+            self.thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
+            for threshold in self.thresholds :
+                if currentPowerkW >= threshold["minPowerProductionKW"] :
+                    return threshold["chargeCurrentAmpere"]
+            # If no threshold is reached, return 0
+            return 0
+
+        except (requests.exceptions.RequestException, requests.exceptions.Timeout):
+            raise IOError
