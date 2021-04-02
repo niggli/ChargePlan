@@ -35,6 +35,14 @@
         {% endif %}
       </tr>
       <tr>
+        <td>Maximale Ladeenergie:</td>
+        {% if limitmaxenergy %}
+          <td>{{ maxenergy }} kWh</td>
+        {% else %}
+          <td>unbegrenzt </td>
+        {% endif %}
+      </tr>
+      <tr>
         <td>Ziel-Zeitpunkt:</td>
         {% if goal %}
           <td>{{ goal }}</td>
@@ -48,14 +56,6 @@
           <td>{{ deadline }}</td>
         {% else %}
           <td>-</td>
-        {% endif %}
-      </tr>
-      <tr>
-        <td>Maximale Ladeenergie:</td>
-        {% if limitmaxenergy %}
-          <td>{{ maxenergy }} kWh</td>
-        {% else %}
-          <td>unbegrenzt </td>
         {% endif %}
       </tr>
     </table>
