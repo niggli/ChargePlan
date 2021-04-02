@@ -113,6 +113,8 @@ class ChargePlanEngine:
                             weatherSensorList.append(Measurement.Swissmeteo(measurement["station"], measurement["thresholds"]))
                         elif measurement["type"] == "Solarlog" :
                             weatherSensorList.append(Measurement.SolarLog(measurement["url"], measurement["username"], measurement["password"], measurement["thresholds"]))
+                        elif measurement["type"] == "Fronius" :
+                            weatherSensorList.append(Measurement.Fronius(measurement["url"], measurement["deviceID"], measurement["thresholds"]))
                         else :
                             self.printToLogfile("Invalid weatherSensor definition")
 
@@ -139,6 +141,8 @@ class ChargePlanEngine:
                         self.printToLogfile("Car connected.")
                         self._goal = None
                         self.deadline = None
+                        self.maxEnergy = 0
+                        self.limitToMaxEnergy = False
                         new_state = ChargePlanState.STATE_CHARGING
                     elif charger.state == Wallbox.WallboxState.STATE_FINISHED_CAR_STILL_CONNECTED :
                         if self.allowCharging == False :
