@@ -1,5 +1,5 @@
 # ChargePlan
-Optimizes the charging of electrical car under an ecological (not financial) point of view. Currently supports the wallbox "goEcharger" and measurement data from Swissmeteo or SolarLog, but is made to be expanded with more "drivers". The web GUI shows state information and allows control of the functionality. Tested and running on Python 3.5
+Optimizes the charging of electrical car under an ecological (not financial) point of view. Currently supports the wallbox "goEcharger" and measurement data from Swissmeteo, SolarLog and Fronius inverters, but is made to be expanded with more "drivers". The web GUI shows state information and allows control of the functionality. Tested and running on Python 3.5
 
 First priority: charge only during solar energy production
 Second priority: charge immediately to ensure car is full
