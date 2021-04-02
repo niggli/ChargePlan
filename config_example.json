@@ -1,6 +1,15 @@
 {
     "measurements": [
         {
+            "type":"Fronius",
+            "url":"https://192.168.178.111",
+            "deviceID":55,
+            "thresholds": [
+                {"minPowerProductionKW":1, "chargeCurrentAmpere":6},
+            ]
+        },
+        
+        {
             "type":"Solarlog",
             "url":"https://xxx.solarlog-web.ch/emulated_main_13343.html",
             "username":"test@customer.ch",
