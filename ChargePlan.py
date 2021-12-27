@@ -115,6 +115,8 @@ class ChargePlanEngine:
                             weatherSensorList.append(Measurement.SolarLog(measurement["url"], measurement["username"], measurement["password"], measurement["thresholds"]))
                         elif measurement["type"] == "Fronius" :
                             weatherSensorList.append(Measurement.Fronius(measurement["url"], measurement["deviceID"], measurement["thresholds"]))
+                        elif measurement["type"] == "Smartfox" :
+                            weatherSensorList.append(Measurement.Smartfox(measurement["ip"], measurement["thresholds"]))
                         else :
                             self.printToLogfile("Invalid weatherSensor definition")
 
@@ -197,7 +199,7 @@ class ChargePlanEngine:
                         for weatherSensor in weatherSensorList:
                             if maxAllowedCurrent == None:
                                 try:
-                                    maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent()
+                                    maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent(self.power)
                                 except IOError:
                                     # probably connection error to sensor
                                     self.printToLogfile("WeatherSensor IOError: " + str(weatherSensor))

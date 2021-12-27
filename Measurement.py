@@ -10,6 +10,12 @@ import re
 # attrgetter is used for sorting list
 from operator import attrgetter
 
+# Socket, umodbus and struct is used for modbus TCP (Smartfox)
+import socket
+from umodbus import conf
+from umodbus.client import tcp
+import struct
+
 
 ######################################################################################
 # Class Swissmeteo
@@ -23,7 +29,7 @@ class Swissmeteo:
         self.stationID = stationID
         self.thresholds = thresholds
 
-    def getMaxAllowedCurrent(self):
+    def getMaxAllowedCurrent(self, powerWallbox):
         try:
             resp = requests.get('https://data.geo.admin.ch/ch.meteoschweiz.messwerte-sonnenscheindauer-10min/ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json', timeout=5)
 
@@ -63,7 +69,7 @@ class SolarLog:
         self.password = password
         self.thresholds = thresholds
 
-    def getMaxAllowedCurrent(self):
+    def getMaxAllowedCurrent(self, powerWallbox):
         #get current power
         try:
             with requests.Session() as s:
@@ -80,7 +86,7 @@ class SolarLog:
 
             # Convert to number and convert from W to kW
             currentPowerkW = int(powerStringList[0]) / 1000
-            print("currentPowerkW: " + str(currentPowerkW))
+            print("currentPowerkW Solarlog: " + str(currentPowerkW))
 
             # The maximum allowed charging power is dependant on the current solar power. Since we only know
             # about production but not about other consumption, this can often not be a 1 to 1 relationship
@@ -110,7 +116,7 @@ class Fronius:
         self.deviceID = deviceID
         self.thresholds = thresholds
 
-    def getMaxAllowedCurrent(self):
+    def getMaxAllowedCurrent(self, powerWallbox):
         try:
             payload = {"Scope": "Device", "DeviceID" : str(self.deviceID), "DataCollection" : "CommonInverterData"}
             resp = requests.get(self.baseURL + "/solar_api/v1/GetInverterRealtimeData.cgi", data=payload, timeout=5)
@@ -118,7 +124,7 @@ class Fronius:
             datastore = resp.json()
 
             currentPowerkW = datastore['Body']['Data']['PAC']['Value'] / 1000
-            print('currentPowerkW:' + str(currentPowerkW))
+            print('currentPowerkW Fronius:' + str(currentPowerkW))
 
             # The maximum allowed charging power is dependant on the current solar power.
 
@@ -132,3 +138,61 @@ class Fronius:
 
         except (requests.exceptions.RequestException, requests.exceptions.Timeout):
             raise IOError
+
+
+######################################################################################
+# Class Smartfox
+#
+# Interface to a Smartfox Pro energy management device.
+######################################################################################
+class Smartfox:
+
+    def __init__(self, IPaddress, thresholds):
+        self.IPaddress = IPaddress
+        self.thresholds = thresholds
+
+    def getMaxAllowedCurrent(self, powerWallbox):
+
+        try:
+            # Enable values to be signed (default is False).
+            conf.SIGNED_VALUES = False
+
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((self.IPaddress, 502))
+
+            # Request the current total power
+            message = tcp.read_holding_registers(slave_id=1, starting_address=41017, quantity=2)
+            response_totalPower = tcp.send_message(message, sock)
+
+            # Request the current power sent to the analog output
+            message = tcp.read_holding_registers(slave_id=1, starting_address=41041, quantity=2)
+            response_analogOutPower = tcp.send_message(message, sock)
+
+            sock.close()
+
+            # Convert response of total power in INT32 to a normal number in kW
+            temp = struct.pack(">HH", response_totalPower[0], response_totalPower[1])
+            totalPowerTuple = struct.unpack(">l", temp)
+            totalPowerkW = totalPowerTuple[0] / 1000
+
+            # Convert response of analogout power in UINT32 to a normal number in kW
+            temp = struct.pack(">HH", response_analogOutPower[0], response_analogOutPower[1])
+            analogOutPowerTuple = struct.unpack(">L", temp)
+            analogOutPowerkW = analogOutPowerTuple[0] / 1000
+
+            # Add both powers in the correct way to get the current power produced and available
+            currentPowerkW = analogOutPowerkW + ((-1) * totalPowerkW) + powerWallbox
+            
+            print('currentPowerkW Smartfox:' + str(currentPowerkW))
+
+            # Sort list so the maximum power is first
+            self.thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
+            for threshold in self.thresholds :
+                if currentPowerkW >= threshold["minPowerProductionKW"] :
+                    return threshold["chargeCurrentAmpere"]
+            # If no threshold is reached, return 0
+            return 0
+
+        except :
+            raise IOError
+

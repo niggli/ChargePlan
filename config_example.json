@@ -1,6 +1,15 @@
 {
     "measurements": [
         {
+            "type":"Smartfox",
+            "ip":"192.168.178.81",
+            "thresholds": [
+                {"minPowerProductionKW":3.2, "chargeCurrentAmpere":8},
+                {"minPowerProductionKW":2.4, "chargeCurrentAmpere":7}
+            ]
+        },
+
+        {
             "type":"Fronius",
             "url":"https://192.168.178.111",
             "deviceID":55,
