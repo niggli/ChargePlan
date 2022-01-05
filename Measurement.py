@@ -118,8 +118,8 @@ class Fronius:
 
     def getMaxAllowedCurrent(self, powerWallbox):
         try:
-            payload = {"Scope": "Device", "DeviceID" : str(self.deviceID), "DataCollection" : "CommonInverterData"}
-            resp = requests.get(self.baseURL + "/solar_api/v1/GetInverterRealtimeData.cgi", data=payload, timeout=5)
+            payload = {"Scope": "Device", "DeviceId" : str(self.deviceID), "DataCollection" : "CommonInverterData"}
+            resp = requests.get(self.baseURL + "/solar_api/v1/GetInverterRealtimeData.cgi", params=payload, timeout=5)
 
             datastore = resp.json()
 
