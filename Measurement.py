@@ -25,11 +25,11 @@ import struct
 ######################################################################################
 class Swissmeteo:
 
-    def __init__(self, stationID, thresholds):
+    def __init__(self, stationID, modes):
         self.stationID = stationID
-        self.thresholds = thresholds
+        self.modes = modes
 
-    def getMaxAllowedCurrent(self, powerWallbox):
+    def getMaxAllowedCurrent(self, powerWallbox, modeID):
         try:
             resp = requests.get('https://data.geo.admin.ch/ch.meteoschweiz.messwerte-sonnenscheindauer-10min/ch.meteoschweiz.messwerte-sonnenscheindauer-10min_de.json', timeout=5)
 
@@ -41,9 +41,14 @@ class Swissmeteo:
                     print('Value:' + str(station['properties']['value']) )
                     sunshineduration = station['properties']['value']
 
+            # Select correct mode and thresholds
+            for mode in self.modes :
+                if mode["id"] == modeID :
+                    thresholds = mode["thresholds"]
+
             # Sort list so the maximum power is first
-            self.thresholds.sort(key=lambda x: x["minSunshineDuration"], reverse=True)
-            for threshold in self.thresholds :
+            thresholds.sort(key=lambda x: x["minSunshineDuration"], reverse=True)
+            for threshold in thresholds :
                 if sunshineduration >= threshold["minSunshineDuration"] :
                     return threshold["chargeCurrentAmpere"]
                     
@@ -63,13 +68,13 @@ class Swissmeteo:
 ######################################################################################
 class SolarLog:
 
-    def __init__(self, url, username, password, thresholds):
+    def __init__(self, url, username, password, modes):
         self.url = url
         self.username = username
         self.password = password
-        self.thresholds = thresholds
+        self.modes = modes
 
-    def getMaxAllowedCurrent(self, powerWallbox):
+    def getMaxAllowedCurrent(self, powerWallbox, modeID):
         #get current power
         try:
             with requests.Session() as s:
@@ -91,11 +96,17 @@ class SolarLog:
             # The maximum allowed charging power is dependant on the current solar power. Since we only know
             # about production but not about other consumption, this can often not be a 1 to 1 relationship
 
+            # Select correct mode and thresholds
+            for mode in self.modes :
+                if mode["id"] == modeID :
+                    thresholds = mode["thresholds"]
+
             # Sort list so the maximum power is first
-            self.thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
-            for threshold in self.thresholds :
+            thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
+            for threshold in thresholds :
                 if currentPowerkW >= threshold["minPowerProductionKW"] :
                     return threshold["chargeCurrentAmpere"]
+
             # If no threshold is reached, return 0
             return 0
 
@@ -111,12 +122,12 @@ class SolarLog:
 ######################################################################################
 class Fronius:
 
-    def __init__(self, baseURL, deviceID, thresholds):
+    def __init__(self, baseURL, deviceID, modes):
         self.baseURL = baseURL
         self.deviceID = deviceID
-        self.thresholds = thresholds
+        self.modes = modes
 
-    def getMaxAllowedCurrent(self, powerWallbox):
+    def getMaxAllowedCurrent(self, powerWallbox, modeID):
         try:
             payload = {"Scope": "Device", "DeviceId" : str(self.deviceID), "DataCollection" : "CommonInverterData"}
             resp = requests.get(self.baseURL + "/solar_api/v1/GetInverterRealtimeData.cgi", params=payload, timeout=5)
@@ -128,11 +139,17 @@ class Fronius:
 
             # The maximum allowed charging power is dependant on the current solar power.
 
+            # Select correct mode and thresholds
+            for mode in self.modes :
+                if mode["id"] == modeID :
+                    thresholds = mode["thresholds"]
+
             # Sort list so the maximum power is first
-            self.thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
-            for threshold in self.thresholds :
+            thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
+            for threshold in thresholds :
                 if currentPowerkW >= threshold["minPowerProductionKW"] :
                     return threshold["chargeCurrentAmpere"]
+                    
             # If no threshold is reached, return 0
             return 0
 
@@ -147,11 +164,11 @@ class Fronius:
 ######################################################################################
 class Smartfox:
 
-    def __init__(self, IPaddress, thresholds):
+    def __init__(self, IPaddress, modes):
         self.IPaddress = IPaddress
-        self.thresholds = thresholds
+        self.modes = modes
 
-    def getMaxAllowedCurrent(self, powerWallbox):
+    def getMaxAllowedCurrent(self, powerWallbox, modeID):
 
         try:
             # Enable values to be signed (default is False).
@@ -185,13 +202,22 @@ class Smartfox:
             
             print('currentPowerkW Smartfox:' + str(currentPowerkW))
 
-            # Sort list so the maximum power is first
-            self.thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
-            for threshold in self.thresholds :
-                if currentPowerkW >= threshold["minPowerProductionKW"] :
-                    return threshold["chargeCurrentAmpere"]
-            # If no threshold is reached, return 0
-            return 0
+            # Select correct mode and thresholds
+            for mode in self.modes :
+                if mode["id"] == modeID :
+                    thresholds = mode["thresholds"]
+            
+            if thresholds != None :
+                # Sort list so the maximum power is first
+                thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
+                for threshold in thresholds :
+                    if currentPowerkW >= threshold["minPowerProductionKW"] :
+                        return threshold["chargeCurrentAmpere"]
+                # If no threshold is reached, return 0
+                return 0
+            else :
+                print("Smartfox Error: Mode not found")
+                return 0
 
         except :
             raise IOError

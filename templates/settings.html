@@ -31,6 +31,23 @@
         <tr>
           <td>Beenden nach (kWh): </td><td><input type="float" name="limit"></td>
         </tr>
+        <tr>
+          <td>Solarstrom-Ausnutzung: </td><td>
+            {% if modeList %}
+              {% if numberOfModes %}
+              <select id="mode" name="mode">
+                {% for mode in modeList %}
+                <option value={{mode["id"]}} {% if mode["id"] == modeSelected %} selected {% endif %}>{{mode["name"]}}</option>
+                {% endfor %}
+              </select>
+              {% else %}
+              Nicht verfügbar
+              {% endif %}
+            {% else %}
+            Nicht verfügbar
+            {% endif %}
+          </td>
+        </tr>
 
       </table>
       <input type="submit" name="settings" value="Senden">

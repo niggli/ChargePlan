@@ -1,59 +1,219 @@
 {
+    "modes": [
+        {
+            "id": 1,
+            "name": "Ausschliesslich Solarenergie laden"
+        },
+        {
+            "id": 2,
+            "name": "Solarenergie ausnutzen (ab 2kW)"
+        },
+        {
+            "id": 3,
+            "name": "Solarenergie ausnutzen (ab 1.5kW)"
+        },
+        {
+            "id": 4,
+            "name": "Solarenergie ausnutzen (ab 1kW)"
+        },
+        {
+            "id": 5,
+            "name": "Nicht automatisch laden"
+        }
+    ],
+
+
     "measurements": [
         {
             "type":"Smartfox",
             "ip":"192.168.178.81",
-            "thresholds": [
-                {"minPowerProductionKW":3.2, "chargeCurrentAmpere":8},
-                {"minPowerProductionKW":2.4, "chargeCurrentAmpere":7}
+            "modes": [
+                {
+                    "id":1,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.2, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":2.4, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":2,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.2, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":2, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":3,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.2, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":1.5, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":4,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.2, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":1.0, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":5,
+                    "thresholds": [
+                        {"minPowerProductionKW":10, "chargeCurrentAmpere":8}
+                    ]
+                }
+
             ]
+            
         },
 
         {
             "type":"Fronius",
-            "url":"https://192.168.178.111",
-            "deviceID":55,
-            "thresholds": [
-                {"minPowerProductionKW":1, "chargeCurrentAmpere":6},
+            "url":"http://192.168.178.99",
+            "deviceID":1,
+            "modes": [
+                {
+                    "id":1,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.5, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":2.6, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":2,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.4, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":2.2, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":3,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.4, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":1.7, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":4,
+                    "thresholds": [
+                        {"minPowerProductionKW":3.4, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":1.2, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id":5,
+                    "thresholds": [
+                        {"minPowerProductionKW":10, "chargeCurrentAmpere":8}
+                    ]
+                }
+
             ]
         },
-        
+
         {
             "type":"Solarlog",
-            "url":"https://xxx.solarlog-web.ch/emulated_main_13343.html",
-            "username":"test@customer.ch",
+            "url":"https://example.solarlog-web.ch/emulated_main_13343.html",
+            "username":"example@domain.ch",
             "password":"12345678",
-            "thresholds": [
-                {"minPowerProductionKW":120, "chargeCurrentAmpere":16},
-                {"minPowerProductionKW":80, "chargeCurrentAmpere":8}
+            "modes": [
+                {
+                    "id": 1,
+                    "thresholds": [
+                        {"minPowerProductionKW":700, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":200, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 2,
+                    "thresholds": [
+                        {"minPowerProductionKW":700, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":140, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 3,
+                    "thresholds": [
+                        {"minPowerProductionKW":700, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":120, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 4,
+                    "thresholds": [
+                        {"minPowerProductionKW":700, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":110, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 5,
+                    "thresholds": [
+                        {"minPowerProductionKW":700, "chargeCurrentAmpere":8},
+                        {"minPowerProductionKW":100, "chargeCurrentAmpere":7}
+                    ]
+                }
             ]
         },
 
         {
             "type":"Swissmeteo",
-            "station":"ABC",
-            "thresholds": [
-                {"minSunshineDuration":9, "chargeCurrentAmpere":16},
-                {"minSunshineDuration":7, "chargeCurrentAmpere":8}
+            "station":"EXA",
+            "modes": [
+                {
+                    "id": 1,
+                    "thresholds": [
+                        {"minSunshineDuration":10, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 2,
+                    "thresholds": [
+                        {"minSunshineDuration":9, "chargeCurrentAmpere":7}
+                    ]
+                },                {
+                    "id": 3,
+                    "thresholds": [
+                        {"minSunshineDuration":8, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 4,
+                    "thresholds": [
+                        {"minSunshineDuration":7, "chargeCurrentAmpere":7}
+                    ]
+                },
+                {
+                    "id": 5,
+                    "thresholds": [
+                        {"minSunshineDuration":7, "chargeCurrentAmpere":7}
+                    ]
+                }
             ]
         }
 
     ],
 
     "wallbox":{
-        "IP":"http://192.168.178.xx",
+        "IP":"http://192.168.178.52",
         "type":"goEcharger",
         "absolutMaxCurrent":16
     },
 
+    "cars":[
+        {
+        "name":"Example Car",
+        "batterysizekWh":44,
+        "deadlineHours":3
+        }
+    ],
+        
+
     "timing":{
-        "deadlineHours":3,
         "connectionMaxRetrys":10,
         "waitAfterFinishedSeconds":300,
         "waitWithoutCarSeconds":120,
         "waitAfterErrorSeconds":60,
         "waitWithoutSunSeconds":120,
-        "waitChargingSeconds":60
+        "waitChargingSeconds":300
     }
 
 }

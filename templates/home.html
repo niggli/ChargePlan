@@ -19,6 +19,14 @@
         {% endif %}
       </tr>
       <tr>
+        <td>Aktueller Solar-Lademodus:</td>
+        {% if mode %}
+          <td>{{ mode }}</td>
+        {% else %}
+          <td>nicht verfügbar </td>
+        {% endif %}
+      </tr>
+      <tr>
         <td>Aktuelle Ladeleistung:</td>
         {% if power %}
           <td>{{ power }} kW</td>

@@ -32,6 +32,7 @@ class ChargePlanEngine:
         self.allowCharging = False # internal state, not the same as the Wallbox state which can change through the Wallbox itself
         self.maxEnergy = 0
         self.limitToMaxEnergy = False
+        self.mode = 1
 
         self.printToLogfile("Main initialized")
 
@@ -79,6 +80,12 @@ class ChargePlanEngine:
             self.limitToMaxEnergy = False
             self.maxEnergy = 0
             self.printToLogfile("No energy limit set" )
+
+    def setMode(self, mode):
+        #Only store data, don't send to wallbox directly
+        self.mode = mode
+        self.printToLogfile("Mode set: " + str(mode))
+
     
     def getGoal(self):
         return self._goal
@@ -110,13 +117,13 @@ class ChargePlanEngine:
                     weatherSensorList = list()
                     for measurement in self.config["measurements"]:
                         if measurement["type"] == "Swissmeteo" :
-                            weatherSensorList.append(Measurement.Swissmeteo(measurement["station"], measurement["thresholds"]))
+                            weatherSensorList.append(Measurement.Swissmeteo(measurement["station"], measurement["modes"]))
                         elif measurement["type"] == "Solarlog" :
-                            weatherSensorList.append(Measurement.SolarLog(measurement["url"], measurement["username"], measurement["password"], measurement["thresholds"]))
+                            weatherSensorList.append(Measurement.SolarLog(measurement["url"], measurement["username"], measurement["password"], measurement["modes"]))
                         elif measurement["type"] == "Fronius" :
-                            weatherSensorList.append(Measurement.Fronius(measurement["url"], measurement["deviceID"], measurement["thresholds"]))
+                            weatherSensorList.append(Measurement.Fronius(measurement["url"], measurement["deviceID"], measurement["modes"]))
                         elif measurement["type"] == "Smartfox" :
-                            weatherSensorList.append(Measurement.Smartfox(measurement["ip"], measurement["thresholds"]))
+                            weatherSensorList.append(Measurement.Smartfox(measurement["ip"], measurement["modes"]))
                         else :
                             self.printToLogfile("Invalid weatherSensor definition")
 
@@ -199,7 +206,7 @@ class ChargePlanEngine:
                         for weatherSensor in weatherSensorList:
                             if maxAllowedCurrent == None:
                                 try:
-                                    maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent(self.power)
+                                    maxAllowedCurrent = weatherSensor.getMaxAllowedCurrent(self.power, self.mode)
                                 except IOError:
                                     # probably connection error to sensor
                                     self.printToLogfile("WeatherSensor IOError: " + str(weatherSensor))

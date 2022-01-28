@@ -8,6 +8,7 @@
 import threading
 import ChargePlan
 import datetime
+import json
 from flask import Flask, render_template, request
 
 # This enum must correlate to the class ChargePlanState
@@ -16,6 +17,10 @@ GUIstates = ["NULL", "Initialisierung", "Kein Auto", "Auto verbunden", "Fertig",
 app = Flask(__name__)
 
 cp = ChargePlan.ChargePlanEngine()
+
+# load configuration from JSON file
+with open('config.json') as configFile:
+    config = json.load(configFile)
 
 @app.route("/",  methods=["GET", "POST"])
 def home():
@@ -36,11 +41,12 @@ def home():
     else :
         GUIallowCharging = None
 
+    GUImode = config["modes"][cp.mode - 1]["name"] #-1 to convert from ID to list index
     GUIpower = "{:.1f}".format(cp.power)
     GUIenergy = "{:.1f}".format(cp.energy)
     GUIlimitToMaxEnergy = cp.limitToMaxEnergy
     GUImaxenergy = "{:.1f}".format(cp.maxEnergy)
-    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy)
+    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy, mode=GUImode)
 
 @app.route("/settings",  methods=["GET", "POST"])
 def settings():
@@ -68,11 +74,16 @@ def settings():
                 cp.setNewGoal(None, None)
             else :
                 cp.setNewGoal(request.form.get('goal_date'), request.form.get('goal_time'))
+
+            if request.form.get('mode') != None :
+                cp.setMode(int(request.form.get('mode')))
             
         return render_template("settings.html", formPosted=True)
     else : #Form not posted
-        return render_template("settings.html", formPosted=None)
-
+        GUIModeList = config["modes"]
+        GUINumberOfModes = len(GUIModeList)
+        GUImodeSelected = cp.mode
+        return render_template("settings.html", formPosted=None, modeList=GUIModeList, numberOfModes=GUINumberOfModes, modeSelected=GUImodeSelected)
 
 class ChargePlanThread(threading.Thread):
     def run(self):
