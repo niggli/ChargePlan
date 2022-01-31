@@ -48,7 +48,7 @@ class ChargePlanEngine:
                 datetimeString = dateString + " " + timeString
                 self._goal = datetime.datetime.strptime(datetimeString, "%d.%m.%Y %H:%M")
                 #Deadline is the latest possible charging start time
-                self.deadline = self._goal - datetime.timedelta(hours=self.config["timing"]["deadlineHours"])
+                self.deadline = self._goal - datetime.timedelta(hours=self.config["cars"][0]["deadlineHours"])
                 self.printToLogfile("Goal: " + str(self._goal))
                 self.printToLogfile("Deadline: " + str(self.deadline))
             except ValueError:
@@ -57,7 +57,7 @@ class ChargePlanEngine:
                     datetimeString = dateString + " " + timeString
                     self._goal = datetime.datetime.strptime(datetimeString, "%Y-%m-%d %H:%M")
                     #Deadline is the latest possible charging start time
-                    self.deadline = self._goal - datetime.timedelta(hours=self.config["timing"]["deadlineHours"])
+                    self.deadline = self._goal - datetime.timedelta(hours=self.config["cars"][0]["deadlineHours"])
                     self.printToLogfile("Goal: " + str(self._goal))
                     self.printToLogfile("Deadline: " + str(self.deadline))
                 except ValueError:

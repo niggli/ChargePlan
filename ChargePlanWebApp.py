@@ -45,8 +45,9 @@ def home():
     GUIpower = "{:.1f}".format(cp.power)
     GUIenergy = "{:.1f}".format(cp.energy)
     GUIlimitToMaxEnergy = cp.limitToMaxEnergy
-    GUImaxenergy = "{:.1f}".format(cp.maxEnergy)
-    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy, mode=GUImode)
+    GUImaxenergy = "{:.0f}".format(cp.maxEnergy / config["cars"][0]["batterysizekWh"] * 100)
+    GUImaxenergykwh = "{:.1f}".format(cp.maxEnergy)
+    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy, maxenergykwh=GUImaxenergykwh, mode=GUImode)
 
 @app.route("/settings",  methods=["GET", "POST"])
 def settings():
@@ -61,6 +62,8 @@ def settings():
         else :
             try:
                 limit = float(request.form.get('limit'))
+                limit = limit * config["cars"][0]["batterysizekWh"] / 100
+                limit = round(limit, 1)
             except ValueError:
                 limit = 0
 
