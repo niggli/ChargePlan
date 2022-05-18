@@ -48,6 +48,23 @@
             {% endif %}
           </td>
         </tr>
+        <tr>
+          <td>Auto: </td><td>
+            {% if carList %}
+              {% if numberOfCars %}
+              <select id="car" name="car">
+                {% for car in carList %}
+                <option value={{car["id"]}} {% if car["id"] == carSelected %} selected {% endif %}>{{car["name"]}}</option>
+                {% endfor %}
+              </select>
+              {% else %}
+              Nicht verfügbar
+              {% endif %}
+            {% else %}
+            Nicht verfügbar
+            {% endif %}
+          </td>
+        </tr>
 
       </table>
       <input type="submit" name="settings" value="Senden">

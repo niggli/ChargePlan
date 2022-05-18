@@ -41,13 +41,15 @@ def home():
     else :
         GUIallowCharging = None
 
+    GUIcar = config["cars"][cp.car - 1]["name"] #-1 to convert from ID to list index
     GUImode = config["modes"][cp.mode - 1]["name"] #-1 to convert from ID to list index
     GUIpower = "{:.1f}".format(cp.power)
     GUIenergy = "{:.1f}".format(cp.energy)
     GUIlimitToMaxEnergy = cp.limitToMaxEnergy
     GUImaxenergy = "{:.0f}".format(cp.maxEnergy / config["cars"][0]["batterysizekWh"] * 100)
     GUImaxenergykwh = "{:.1f}".format(cp.maxEnergy)
-    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy, maxenergykwh=GUImaxenergykwh, mode=GUImode)
+    GUIcar = config["cars"][cp.car - 1]["name"] #-1 to convert from ID to list index
+    return render_template("home.html", state=GUIstate, allowCharging=GUIallowCharging, power=GUIpower, deadline=GUIdeadline, energy=GUIenergy, goal=GUIgoal, limitmaxenergy=GUIlimitToMaxEnergy, maxenergy=GUImaxenergy, maxenergykwh=GUImaxenergykwh, mode=GUImode, car=GUIcar)
 
 @app.route("/settings",  methods=["GET", "POST"])
 def settings():
@@ -60,9 +62,13 @@ def settings():
             dateObjectNow = datetime.datetime.now()
             cp.setNewGoal(dateObjectNow.date().strftime("%d.%m.%Y"), dateObjectNow.time().strftime("%H:%M"))
         else :
+
+            if request.form.get('car') != None :
+                cp.setCar(int(request.form.get('car')))
+
             try:
                 limit = float(request.form.get('limit'))
-                limit = limit * config["cars"][0]["batterysizekWh"] / 100
+                limit = limit * config["cars"][cp.car - 1]["batterysizekWh"] / 100
                 limit = round(limit, 1)
             except ValueError:
                 limit = 0
@@ -80,13 +86,17 @@ def settings():
 
             if request.form.get('mode') != None :
                 cp.setMode(int(request.form.get('mode')))
+
             
         return render_template("settings.html", formPosted=True)
     else : #Form not posted
         GUIModeList = config["modes"]
         GUINumberOfModes = len(GUIModeList)
         GUImodeSelected = cp.mode
-        return render_template("settings.html", formPosted=None, modeList=GUIModeList, numberOfModes=GUINumberOfModes, modeSelected=GUImodeSelected)
+        GUICarList = config["cars"]
+        GUINumberOfCars = len(GUICarList)
+        GUICarSelected = cp.car
+        return render_template("settings.html", formPosted=None, modeList=GUIModeList, numberOfModes=GUINumberOfModes, modeSelected=GUImodeSelected, carList=GUICarList, numberOfCars=GUINumberOfCars, carSelected=GUICarSelected)
 
 class ChargePlanThread(threading.Thread):
     def run(self):

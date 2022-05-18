@@ -200,10 +200,17 @@
 
     "cars":[
         {
-        "name":"Example Car",
-        "batterysizekWh":44,
-        "deadlineHours":3
-        }
+            "id": 1,
+            "name":"Example Car 1",
+            "batterysizekWh":22,
+            "deadlineHours":3
+            },
+            {
+            "id": 2,
+            "name":"Example Car 2",
+            "batterysizekWh":6.5,
+            "deadlineHours":5
+            }
     ],
         
 

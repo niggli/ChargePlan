@@ -33,6 +33,7 @@ class ChargePlanEngine:
         self.maxEnergy = 0
         self.limitToMaxEnergy = False
         self.mode = 1
+        self.car = 1
 
         self.printToLogfile("Main initialized")
 
@@ -85,6 +86,11 @@ class ChargePlanEngine:
         #Only store data, don't send to wallbox directly
         self.mode = mode
         self.printToLogfile("Mode set: " + str(mode))
+
+    def setCar(self, car):
+        #Only store data
+        self.car = car
+        self.printToLogfile("Car set: " + str(car))
 
     
     def getGoal(self):
