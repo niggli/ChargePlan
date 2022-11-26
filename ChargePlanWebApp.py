@@ -87,6 +87,8 @@ def settings():
             if request.form.get('mode') != None :
                 cp.setMode(int(request.form.get('mode')))
 
+            cp.activateSettings()
+
             
         return render_template("settings.html", formPosted=True)
     else : #Form not posted
