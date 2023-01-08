@@ -129,11 +129,13 @@ class Fronius:
 
     def getMaxAllowedCurrent(self, powerWallbox, modeID):
         try:
+
             payload = {"Scope": "Device", "DeviceId" : str(self.deviceID), "DataCollection" : "CommonInverterData"}
             resp = requests.get(self.baseURL + "/solar_api/v1/GetInverterRealtimeData.cgi", params=payload, timeout=5)
-
+            
             datastore = resp.json()
 
+            # If no power is currently produced, the following field is not in the json which will generate an exception
             currentPowerkW = datastore['Body']['Data']['PAC']['Value'] / 1000
             print('currentPowerkW Fronius:' + str(currentPowerkW))
 
@@ -144,7 +146,8 @@ class Fronius:
                 if mode["id"] == modeID :
                     thresholds = mode["thresholds"]
 
-            # Sort list so the maximum power is first
+            # Sort list so the maximum power is first            
+
             thresholds.sort(key=lambda x: x["minPowerProductionKW"], reverse=True)
             for threshold in thresholds :
                 if currentPowerkW >= threshold["minPowerProductionKW"] :
@@ -153,7 +156,7 @@ class Fronius:
             # If no threshold is reached, return 0
             return 0
 
-        except (requests.exceptions.RequestException, requests.exceptions.Timeout):
+        except :
             raise IOError
 
 
